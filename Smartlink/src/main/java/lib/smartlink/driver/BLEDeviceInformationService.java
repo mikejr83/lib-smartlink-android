@@ -30,6 +30,7 @@ package lib.smartlink.driver;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 
 import lib.smartlink.BLEService;
 import lib.smartlink.Util;
@@ -46,6 +47,8 @@ public class BLEDeviceInformationService
 
         void didUpdateSystemID(BLEDeviceInformationService device, String systemID);
     }
+
+    public static final String TAG = "lib-smartlink";
 
     private String mSerialNumber;
     private String mSystemID;
@@ -69,11 +72,11 @@ public class BLEDeviceInformationService
     protected void didUpdateValueForCharacteristic(String c) {
         if (c.equalsIgnoreCase("serialnumber")) {
             mSerialNumber = getStringValueForCharacteristic("serialnumber").trim();
-            Log.i("lib-smartlink-devinfo", "Serial number updated: " + mSerialNumber + " (len=" + mSerialNumber.length() + ")");
+            Log.i(TAG, "Serial number updated: " + mSerialNumber + " (len=" + mSerialNumber.length() + ")");
             try {
                 delegate.get().didUpdateSerialNumber(this, mSerialNumber);
             } catch (NullPointerException ex) {
-                Log.w("lib-smartlink-devinfo", "No delegate set");
+                Log.w(TAG, "No delegate set");
             }
         } else if (c.equalsIgnoreCase("systemid")) {
             byte[] sysIDBytes = getBytesForCharacteristic("systemid");
@@ -84,16 +87,16 @@ public class BLEDeviceInformationService
 
             Util.reverse(newSysIDBytes);
 
-            mSystemID = Util.bytesToHex(newSysIDBytes).toLowerCase();
+            mSystemID = Util.bytesToHex(newSysIDBytes).toLowerCase(Locale.ROOT);
 
             if (mSystemID != null)
-                Log.i("lib-smartlink-devinfo", "System ID updated: " + mSystemID);
+                Log.i(TAG, "System ID updated: " + mSystemID);
 
             if (delegate != null) {
                 try {
                     delegate.get().didUpdateSystemID(this, mSystemID);
                 } catch (Exception ex) {
-                    Log.i("lib-smartlink-devinfo", "Error in delegate.");
+                    Log.i(TAG, "Error in delegate.");
                 }
             }
         }

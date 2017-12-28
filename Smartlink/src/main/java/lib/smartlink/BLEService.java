@@ -44,7 +44,7 @@ import java.util.HashMap;
  */
 public abstract class BLEService {
 
-    private static final String TAG = "lib-smartlink-BLEService";
+    private static final String TAG = "lib-smartlink";
     protected WeakReference<BluetoothDevice> mParent;
     protected HashMap<String, BluetoothGattCharacteristic> mFields;
     protected BluetoothGatt mGatt;

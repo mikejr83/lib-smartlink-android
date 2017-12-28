@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package lib.smartlink;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -37,6 +38,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import com.dd.plist.NSDictionary;
@@ -54,6 +56,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -93,7 +96,7 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
         void didConnect(BluetoothDevice device);
     }
 
-    private static final String TAG = "lib-smartlink-BluetoothDevice";
+    private static final String TAG = "lib-smartlink";
     private static final int ADV_128BIT_UUID_ALL = 0x06;
     private static final int ADV_128BIT_UUID_MORE = 0x07;
     private static final int ADV_128BIT_UUID_SHORTNAME = 0x08;
@@ -185,6 +188,10 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
         }
 
         @Override
+        @RequiresPermission(allOf = {
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+        })
         public void run() {
             try {
                 // mBluetoothGatt can be set to null by another thread even after the null check
@@ -272,7 +279,7 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
 
     private static String uuidHarmonize(String old) {
         // takes a 16 or 128 bit uuid string (with dashes) and harmonizes it into a 128 bit uuid
-        String uuid = old.toUpperCase();
+        String uuid = old.toUpperCase(Locale.ROOT);
         if (uuid.length() == 4) {
             // 16 bit UUID. Convert to 128 bit using Bluetooth base UUID.
             uuid = "0000" + uuid + "-0000-1000-8000-00805F9B34FB";
@@ -373,6 +380,10 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
      *
      * @throws BluetoothDisabledException
      */
+    @RequiresPermission(allOf = {
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+    })
     public void connect() throws BluetoothDisabledException {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) mOwner.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -395,6 +406,10 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
         }
     }
 
+    @RequiresPermission(allOf = {
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+    })
     private void startScanning() {
         mBluetoothAdapter.stopLeScan(this); // in case scan was already running
         mBluetoothAdapter.startLeScan(this);
@@ -471,6 +486,7 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
     }
 
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void onLeScan(android.bluetooth.BluetoothDevice d, int rssi, byte[] scanRecord) {
         // When scan results are received
         mDevice = d;
@@ -526,6 +542,10 @@ public class BluetoothDevice extends BluetoothGattCallback implements BluetoothA
     }
 
     @Override
+    @RequiresPermission(allOf = {
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+    })
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         Log.d(TAG, "Connection state changed to " + newState + " (status: " + status + ")");
         switch (newState) {
